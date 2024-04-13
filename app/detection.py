@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import base64
+import hashlib
+import os
 from flask import request, jsonify
 from io import BytesIO
 from PIL import Image
@@ -23,13 +25,30 @@ CLASSES = [
     "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
     "toothbrush"
 ]
-9
+
+# Function to generate a unique filename
+def generate_filename(file_path):
+    file_name = os.path.basename(file_path)
+    file_name, file_extension = os.path.splitext(file_name)
+    hash_val = hashlib.md5(file_path.encode()).hexdigest()[:10]  # Generate MD5 hash of the file path
+    return f"{file_name}_{hash_val}{file_extension}"
+
+# Define folder path to save annotated images
+ANNOTATIONS_FOLDER = '/Users/mohitjindal/Desktop/images/annotations/'
+# Create ANNOTATIONS_FOLDER if it doesn't exist
+if not os.path.exists(ANNOTATIONS_FOLDER):
+    os.makedirs(ANNOTATIONS_FOLDER)
+
 # Route to detect objects in uploaded image
 @app.route('/detect', methods=['POST'])
 def detect_objects():
-    # Get uploaded image
-    file = request.files['image']
-    image = Image.open(BytesIO(file.read()))
+    # Get file path from JSON payload
+    data = request.get_json()
+    file_path = data['file_path']
+
+    # Load image from file path
+    image = Image.open(file_path)
+
 
     # Convert image to RGB (3 channels)
     image = image.convert("RGB")
@@ -80,15 +99,24 @@ def detect_objects():
             label = f"{class_name}: {confidence * 100:.2f}%"
             y = startY - 15 if startY - 15 > 15 else startY + 15
             x = startX
-            cv2.putText(np_image, label, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(np_image, label, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4)
 
     # Convert image to base64 encoding
-    _, buffer = cv2.imencode('.jpg', np_image)
-    img_str = base64.b64encode(buffer)
+    # _, buffer = cv2.imencode('.jpg', np_image)
+    # img_str = base64.b64encode(buffer)
+            
+    # Generate unique file name for annotated image
+    # file_name = os.path.basename(file_path)
+    annotated_file_name = generate_filename(file_path)
+    annotated_file_path = os.path.join(ANNOTATIONS_FOLDER, annotated_file_name)
+
+    # Save annotated image to specified folder
+    cv2.imwrite(annotated_file_path, np_image)
 
     # Return the modified image along with annotations in the response
     response_data = {
-        'image': img_str.decode('utf-8'),
+        # 'image': img_str.decode('utf-8'),
+        'annotated_image_path': annotated_file_path,
         'annotations': annotations
     }
     return jsonify(response_data)
