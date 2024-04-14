@@ -63,6 +63,7 @@ The API will return a JSON response containing the annotated image file path and
 
 ### Directory Structure
 
+```plaintext
 object-detection-api/
 ├── app/
 │   ├── __init__.py
@@ -71,7 +72,7 @@ object-detection-api/
 ├── run.py
 └── deploy.prototxt.txt
 └── deploy.caffemodel
-
+```
 
 app/: Contains Flask application files.
 requirements.txt: List of Python dependencies.
