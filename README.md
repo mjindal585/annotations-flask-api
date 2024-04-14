@@ -15,7 +15,7 @@ cd object-detection-api
 pip install -r requirements.txt
 ```
 
-### Usage
+## Usage
 
 1. Run the Flask server:
 
@@ -72,15 +72,15 @@ object-detection-api/
 ├── run.py
 └── deploy.prototxt.txt
 └── deploy.caffemodel
-```
 
 app/: Contains Flask application files.
 requirements.txt: List of Python dependencies.
 run.py: Entry point for running the Flask server.
 deploy.prototxt.txt and deploy.caffemodel: Pre-trained model files for object detection.
+```
 
-### Contributing
+## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-### License
+## License
 MIT
